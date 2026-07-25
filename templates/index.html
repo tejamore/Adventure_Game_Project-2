@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quest for the Lost Treasure — Expedition Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --void:#0a121c;
+    --panel:#101c29;
+    --panel-raised:#142334;
+    --border:#22364a;
+    --border-soft:#1a2a3b;
+    --ink:#efe6d3;
+    --ink-dim:#b9c3cc;
+    --muted:#7d92a1;
+    --amber:#e8a33d;
+    --amber-bright:#ffc369;
+    --forest:#4f8f6b;
+    --forest-bright:#6fb98a;
+    --rust:#c1613f;
+    --rust-bright:#e2825a;
+    --gold:#d9b34d;
+    --gold-bright:#f3d27a;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, #14263a 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 110%, #0f2a24 0%, transparent 50%),
+      var(--void);
+    color:var(--ink);
+    font-family:'Spectral', serif;
+    min-height:100vh;
+  }
+
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:18px;
+    margin-bottom:22px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .compass{ width:42px; height:42px; flex:none; animation:spin 40s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .brand h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:1.5rem;
+    letter-spacing:0.03em;
+    margin:0;
+    color:var(--ink);
+    line-height:1.15;
+  }
+  .brand .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 3px;
+  }
+
+  .status-badge{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .status-badge.exploring{ color:var(--amber); border-color:#4a3a1e; background:#1c1608; }
+  .status-badge.won{ color:var(--gold-bright); border-color:#4a3f17; background:#1e1808; }
+  .status-badge.lost{ color:var(--rust-bright); border-color:#4a241a; background:#1e0f0a; }
+
+  /* ---------- Layout grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width: 760px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Trail panel ---------- */
+  .trail-panel{
+    background:var(--panel);
+    border:1px solid var(--border-soft);
+    border-radius:14px;
+    padding:18px 16px;
+    position:sticky;
+    top:20px;
+  }
+  @media (max-width: 760px){
+    .trail-panel{ position:static; }
+  }
+  .trail-title{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.66rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+  .trail{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+  }
+  @media (max-width:760px){
+    .trail{ flex-direction:row; flex-wrap:wrap; }
+  }
+  .trail-node{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    position:relative;
+    padding-bottom:22px;
+    opacity:0;
+    transform:translateY(6px);
+    animation:node-in 0.5s ease forwards;
+  }
+  @keyframes node-in{ to{ opacity:1; transform:translateY(0); } }
+  .trail-node:last-child{ padding-bottom:0; }
+  .trail-node::before{
+    content:"";
+    position:absolute;
+    left:9px; top:22px; bottom:-2px;
+    width:1px;
+    background:var(--border);
+  }
+  .trail-node:last-child::before{ display:none; }
+  .dot{
+    flex:none;
+    width:19px; height:19px;
+    border-radius:50%;
+    background:var(--panel-raised);
+    border:1.5px solid var(--border);
+    margin-top:1px;
+  }
+  .trail-node.forest .dot{ border-color:var(--forest); background:#0f1f17; }
+  .trail-node.cave .dot{ border-color:var(--muted); background:#161c22; }
+  .trail-node.win .dot{ border-color:var(--gold); background:#241d09; box-shadow:0 0 10px 1px rgba(217,179,77,0.5); }
+  .trail-node.lose .dot{ border-color:var(--rust); background:#241109; }
+  .trail-node.current .dot{
+    border-color:var(--amber);
+    background:#221807;
+    animation:flicker 1.6s ease-in-out infinite;
+  }
+  @keyframes flicker{
+    0%,100%{ box-shadow:0 0 6px 1px rgba(232,163,61,0.55); }
+    50%{ box-shadow:0 0 12px 3px rgba(255,195,105,0.85); }
+  }
+  .node-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.74rem;
+    color:var(--ink-dim);
+    line-height:1.3;
+    padding-top:1px;
+  }
+  .trail-node.current .node-label{ color:var(--amber-bright); }
+  .trail-node.win .node-label{ color:var(--gold-bright); }
+  .trail-node.lose .node-label{ color:var(--rust-bright); }
+
+  /* ---------- Story panel ---------- */
+  .story-panel{
+    background:var(--panel);
+    border:1px solid var(--border-soft);
+    border-radius:14px;
+    padding:28px 30px 26px;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+  }
+  .scene-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 8px;
+  }
+  .scene-title{
+    font-family:'Cinzel', serif;
+    font-size:1.3rem;
+    font-weight:600;
+    color:var(--ink);
+    margin:0 0 14px;
+  }
+  .scene-text{
+    font-size:1.03rem;
+    line-height:1.72;
+    color:var(--ink-dim);
+    margin:0 0 12px;
+  }
+  .scene-text:last-of-type{ margin-bottom:22px; }
+  .scene-text em{ color:var(--amber-bright); font-style:italic; }
+
+  .name-form{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:auto;
+  }
+  .name-form input{
+    flex:1 1 220px;
+    background:var(--panel-raised);
+    border:1px solid var(--border);
+    color:var(--ink);
+    font-family:'Spectral', serif;
+    font-size:1rem;
+    padding:12px 14px;
+    border-radius:8px;
+    outline:none;
+  }
+  .name-form input:focus{ border-color:var(--amber); }
+  .name-form input::placeholder{ color:var(--muted); }
+
+  .choices{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:auto;
+  }
+  .choice-btn{
+    flex:1 1 220px;
+    text-align:left;
+    background:var(--panel-raised);
+    border:1px solid var(--border);
+    color:var(--ink);
+    font-family:'Spectral', serif;
+    font-size:0.98rem;
+    padding:16px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+    position:relative;
+  }
+  .choice-btn .choice-tag{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.64rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:6px;
+  }
+  .choice-btn:hover{
+    border-color:var(--amber);
+    background:#182233;
+    transform:translateY(-1px);
+  }
+  .choice-btn:active{ transform:translateY(0); }
+
+  .primary-btn{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:var(--amber);
+    color:#20140a;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .primary-btn:hover{ background:var(--amber-bright); transform:translateY(-1px); }
+
+  .end-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:auto;
+    align-items:center;
+  }
+  .result-banner{
+    font-family:'Cinzel', serif;
+    font-size:1.15rem;
+    font-weight:600;
+    padding:14px 18px;
+    border-radius:10px;
+    margin-bottom:18px;
+  }
+  .result-banner.win{
+    color:var(--gold-bright);
+    background:#1c1607;
+    border:1px solid #4a3f17;
+  }
+  .result-banner.lose{
+    color:var(--rust-bright);
+    background:#1c0f09;
+    border:1px solid #4a241a;
+  }
+
+  footer{
+    margin-top:26px;
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    color:var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <svg class="compass" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="#e8a33d" stroke-width="2"/>
+        <circle cx="50" cy="50" r="3" fill="#e8a33d"/>
+        <path d="M50 10 L58 50 L50 46 L42 50 Z" fill="#e8a33d"/>
+        <path d="M50 90 L58 50 L50 54 L42 50 Z" fill="#3a4a58"/>
+        <line x1="50" y1="18" x2="50" y2="26" stroke="#7d92a1" stroke-width="1.5"/>
+        <line x1="50" y1="74" x2="50" y2="82" stroke="#7d92a1" stroke-width="1.5"/>
+        <line x1="18" y1="50" x2="26" y2="50" stroke="#7d92a1" stroke-width="1.5"/>
+        <line x1="74" y1="50" x2="82" y2="50" stroke="#7d92a1" stroke-width="1.5"/>
+      </svg>
+      <div>
+        <p class="eyebrow">Expedition Dashboard</p>
+        <h1>Quest for the Lost Treasure</h1>
+      </div>
+    </div>
+    <div class="status-badge exploring" id="statusBadge">Awaiting Explorer</div>
+  </header>
+
+  <div class="grid">
+    <aside class="trail-panel">
+      <p class="trail-title">Expedition Trail</p>
+      <ul class="trail" id="trail"></ul>
+    </aside>
+
+    <main class="story-panel" id="storyPanel">
+      <!-- populated by JS -->
+    </main>
+  </div>
+
+  <footer>adventure_game.py — visual companion · same story, same rules, run in the browser</footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Game data mirrors adventure_game.py exactly: start_game() ->
+   forest_path() / cave_path(has_clue), same branch outcomes.
+------------------------------------------------------------------*/
+
+const state = {
+  name: "",
+  hasClue: false,
+  trail: [],       // [{label, cls}]
+  finished: false,
+  won: false,
+};
+
+const trailEl = document.getElementById("trail");
+const storyEl = document.getElementById("storyPanel");
+const statusEl = document.getElementById("statusBadge");
+
+function addTrailNode(label, cls){
+  // demote previous "current" node
+  state.trail.forEach(n => { if(n.cls.includes("current")) n.cls = n.cls.replace("current","").trim(); });
+  state.trail.push({label, cls: cls + " current"});
+  renderTrail();
+}
+
+function finalizeTrail(cls){
+  const last = state.trail[state.trail.length-1];
+  last.cls = last.cls.replace("current","").trim() + " " + cls;
+  renderTrail();
+}
+
+function renderTrail(){
+  trailEl.innerHTML = "";
+  state.trail.forEach((n, i) => {
+    const li = document.createElement("li");
+    li.className = "trail-node " + n.cls;
+    li.style.animationDelay = (i * 0.03) + "s";
+    li.innerHTML = `<span class="dot"></span><span class="node-label">${n.label}</span>`;
+    trailEl.appendChild(li);
+  });
+}
+
+function setStatus(text, cls){
+  statusEl.textContent = text;
+  statusEl.className = "status-badge " + cls;
+}
+
+function scene({eyebrow, title, paragraphs, body}){
+  storyEl.innerHTML = `
+    <p class="scene-eyebrow">${eyebrow}</p>
+    <h2 class="scene-title">${title}</h2>
+    ${paragraphs.map(p => `<p class="scene-text">${p}</p>`).join("")}
+  `;
+  storyEl.appendChild(body);
+}
+
+function choiceButton(tag, text, handler){
+  const btn = document.createElement("button");
+  btn.className = "choice-btn";
+  btn.innerHTML = `<span class="choice-tag">${tag}</span>${text}`;
+  btn.addEventListener("click", handler);
+  return btn;
+}
+
+/* ---------------------- Scene: Intro / name ---------------------- */
+function renderIntro(){
+  state.trail = [];
+  addTrailNode("Base Camp", "camp");
+  setStatus("Awaiting Explorer", "exploring");
+
+  const body = document.createElement("form");
+  body.className = "name-form";
+  body.innerHTML = `
+    <input type="text" id="nameInput" placeholder="Enter your name, explorer..." maxlength="24" autofocus />
+    <button type="submit" class="primary-btn">Begin the Quest</button>
+  `;
+  body.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = document.getElementById("nameInput").value.trim();
+    state.name = val || "Explorer";
+    renderPathChoice();
+  });
+
+  scene({
+    eyebrow: "Prologue",
+    title: "The Legend of the Lost Treasure",
+    paragraphs: [
+      "Legend speaks of a legendary treasure hidden deep within an ancient land, guarded by trials of courage and wit.",
+      "Many have searched for it, but few have returned. Today, you set out to find it — but first, the land wants to know your name."
+    ],
+    body
+  });
+}
+
+/* ---------------------- Scene: forest / cave fork ---------------------- */
+function renderPathChoice(){
+  setStatus(`Exploring · ${state.name}`, "exploring");
+
+  const body = document.createElement("div");
+  body.className = "choices";
+  body.appendChild(choiceButton("Path One", "Enter the dark, whispering forest", () => {
+    addTrailNode("Dark Forest", "forest");
+    renderForest();
+  }));
+  body.appendChild(choiceButton("Path Two", "Descend into the mysterious cave", () => {
+    addTrailNode("Cave Mouth", "cave");
+    renderCave(false);
+  }));
+
+  scene({
+    eyebrow: `Chapter 1 · ${state.name}'s Departure`,
+    title: "Two Paths Ahead",
+    paragraphs: [
+      `Welcome, <em>${escapeHtml(state.name)}</em>. Ahead of you lie two paths into the unknown.`,
+      "Do you enter the dark, whispering forest, or descend into the mysterious, echoing cave?"
+    ],
+    body
+  });
+}
+
+/* ---------------------- Scene: forest fork ---------------------- */
+function renderForest(){
+  const body = document.createElement("div");
+  body.className = "choices";
+  body.appendChild(choiceButton("Option A", "Follow the river downstream", () => {
+    addTrailNode("Whispering River", "forest");
+    renderRiver();
+  }));
+  body.appendChild(choiceButton("Option B", "Climb a tall tree for a better view", () => {
+    addTrailNode("Ancient Tree", "forest");
+    renderTree();
+  }));
+
+  scene({
+    eyebrow: `Chapter 2 · The Forest`,
+    title: "A Fork in the Path",
+    paragraphs: [
+      `${escapeHtml(state.name)} steps into the dark forest. Tall trees block out the sunlight, and strange sounds echo all around.`,
+      "Soon you come across a fork in the path. Do you follow the river, or climb a tall tree?"
+    ],
+    body
+  });
+}
+
+function renderRiver(){
+  state.hasClue = true;
+  const body = document.createElement("div");
+  body.className = "end-actions";
+  body.appendChild(choiceButton("Continue", "Approach the cave entrance →", () => {
+    addTrailNode("Cave Entrance", "cave");
+    renderCave(true);
+  }));
+
+  scene({
+    eyebrow: "Chapter 2 · The River",
+    title: "A Clue in Stone",
+    paragraphs: [
+      "You follow the gentle sound of flowing water. The river leads you to a hidden clearing where an old stone map is carved into a rock, pointing toward a hidden cave entrance.",
+      "<em>You have found a clue that brings you closer to the treasure!</em>"
+    ],
+    body
+  });
+}
+
+function renderTree(){
+  const body = document.createElement("div");
+  body.className = "choices";
+  body.appendChild(choiceButton("Careful", "Climb down slowly and quietly", () => {
+    addTrailNode("Climbed Down Safely", "forest");
+    state.hasClue = true;
+    renderCaveApproachFromTree();
+  }));
+  body.appendChild(choiceButton("Quick", "Jump down to save time", () => {
+    addTrailNode("Wolves' Clearing", "lose-pending");
+    renderWolvesLose();
+  }));
+
+  scene({
+    eyebrow: "Chapter 2 · The Tree",
+    title: "Eyes on the Horizon",
+    paragraphs: [
+      "You climb the tallest tree you can find. From the top, you spot a glint of gold near a rocky outcrop in the distance — and, unfortunately, you also spot a pack of wolves patrolling the forest floor below.",
+      "Do you climb down carefully, or jump down quickly?"
+    ],
+    body
+  });
+}
+
+function renderCaveApproachFromTree(){
+  const body = document.createElement("div");
+  body.className = "end-actions";
+  body.appendChild(choiceButton("Continue", "Approach the cave entrance →", () => {
+    addTrailNode("Cave Entrance", "cave");
+    renderCave(true);
+  }));
+
+  scene({
+    eyebrow: "Chapter 2 · The Descent",
+    title: "A Safer Way Down",
+    paragraphs: [
+      "You climb down slowly and quietly, avoiding the wolves entirely. You continue toward the rocky outcrop and discover the entrance to a cave!"
+    ],
+    body
+  });
+}
+
+function renderWolvesLose(){
+  endGame(false, {
+    eyebrow: "Chapter 2 · Outcome",
+    title: "The Wolves Close In",
+    paragraphs: [
+      "You jump down quickly to save time, but you land awkwardly and twist your ankle. The wolves hear the noise and begin to close in.",
+      "Unable to run, your journey ends here."
+    ]
+  });
+}
+
+/* ---------------------- Scene: cave fork ---------------------- */
+function renderCave(hasClue){
+  const body = document.createElement("div");
+  body.className = "choices";
+  body.appendChild(choiceButton("Option A", "Light a torch before entering", () => {
+    addTrailNode("Torchlight", hasClue ? "win-pending" : "lose-pending");
+    if(hasClue) renderTreasure(); else renderTorchNoClueLose();
+  }));
+  body.appendChild(choiceButton("Option B", "Proceed in the dark", () => {
+    addTrailNode("Into the Dark", "lose-pending");
+    renderDarkLose();
+  }));
+
+  scene({
+    eyebrow: `Chapter 3 · The Cave`,
+    title: hasClue ? "The Threshold, Map in Hand" : "The Threshold",
+    paragraphs: [
+      `${escapeHtml(state.name)} approaches the mouth of a mysterious cave.` +
+        (hasClue ? " Thanks to the clue you found earlier, you know the treasure lies somewhere deep within these tunnels." : ""),
+      "Cold air drifts out from the darkness within. You must decide how to proceed — light a torch, or proceed in the dark?"
+    ],
+    body
+  });
+}
+
+function renderTreasure(){
+  endGame(true, {
+    eyebrow: "Chapter 3 · Victory",
+    title: "The Legendary Treasure",
+    paragraphs: [
+      "You light a torch. Its warm glow reveals ancient carvings on the walls, guiding you safely through the twisting tunnels.",
+      "Following the map's clue and the carvings on the walls, you arrive at a hidden chamber. In the center, resting on a stone pedestal, lies the <em>LEGENDARY TREASURE!</em>",
+      `Congratulations, ${escapeHtml(state.name)}! You have won the game and claimed the treasure!`
+    ]
+  });
+}
+
+function renderTorchNoClueLose(){
+  endGame(false, {
+    eyebrow: "Chapter 3 · Outcome",
+    title: "Endless Tunnels",
+    paragraphs: [
+      "You light a torch. Its warm glow reveals ancient carvings on the walls, guiding you safely through the twisting tunnels.",
+      "Without the earlier clue, the tunnels branch endlessly. You wander for hours before finding your way back out, empty-handed but alive."
+    ]
+  });
+}
+
+function renderDarkLose(){
+  endGame(false, {
+    eyebrow: "Chapter 3 · Outcome",
+    title: "A Hidden Pit",
+    paragraphs: [
+      "You creep forward in total darkness. Without light, you misjudge a step and fall into a hidden pit.",
+      "Your torchless gamble has cost you the quest."
+    ]
+  });
+}
+
+/* ---------------------- End game ---------------------- */
+function endGame(won, sceneData){
+  state.finished = true;
+  state.won = won;
+  finalizeTrail(won ? "win" : "lose");
+  setStatus(won ? "Victory" : "Quest Ended", won ? "won" : "lost");
+
+  const banner = document.createElement("div");
+  banner.className = "result-banner " + (won ? "win" : "lose");
+  banner.textContent = won
+    ? "RESULT: You found the treasure. Victory is yours!"
+    : "RESULT: Your quest has ended without the treasure.";
+
+  const actions = document.createElement("div");
+  actions.className = "end-actions";
+  actions.appendChild(choiceButton("Play Again", "Restart the expedition", () => {
+    state.hasClue = false;
+    state.finished = false;
+    renderIntro();
+  }));
+
+  scene({
+    eyebrow: sceneData.eyebrow,
+    title: sceneData.title,
+    paragraphs: sceneData.paragraphs,
+    body: actions
+  });
+  storyEl.insertBefore(banner, storyEl.querySelector(".end-actions"));
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+renderIntro();
+</script>
+</body>
+</html>
