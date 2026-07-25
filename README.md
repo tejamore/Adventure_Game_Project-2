@@ -1,1 +1,2 @@
-# Adventure_Game_Project-2
+Flask==3.0.3
+gunicorn
