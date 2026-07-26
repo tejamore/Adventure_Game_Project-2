@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="story-card intro">
-  <p class="story-text">
-    An ancient land. A legendary treasure lost to time. Rumor says it lies
-    hidden past a dark forest, or deep inside a mysterious cave &mdash; but
-    only the bold, and the clever, will ever find it.
-  </p>
-  <p class="story-text">What is your name, explorer?</p>
+  <div class="quest-intro">
+    <p class="story-text quest-title">⚔️ THE LEGENDARY QUEST BEGINS ⚔️</p>
+    <p class="story-text">
+      An ancient land. A legendary treasure lost to time. Rumor says
+      it lies hidden past a dark forest, or deep inside a mysterious cave
+      &mdash; but only the bold, and the clever, will ever find it.
+    </p>
+    <p class="story-text quest-subtitle">
+      Legends speak of brave adventurers who ventured into the unknown,
+      seeking glory and fortune. Many have tried. Few have succeeded.
+      Will you be the one to claim the legendary treasure?
+    </p>
+    <p class="story-text quest-prompt">
+      Before you begin your perilous journey, tell us: What is your name, adventurer?
+    </p>
+  </div>
+
   <form action="{{ url_for('start') }}" method="post" class="name-form">
-    <input
-      type="text"
-      name="player_name"
-      placeholder="Enter your name..."
-      autofocus
-      maxlength="30"
-      required
-    />
+    <div class="input-wrapper">
+      <input
+        type="text"
+        name="player_name"
+        placeholder="Enter your name..."
+        autofocus
+        maxlength="30"
+        required
+        aria-label="Enter your adventurer name"
+      />
+      <span class="input-icon">🗡️</span>
+    </div>
     <button type="submit" class="btn-primary">Begin the Adventure</button>
+    <p class="form-hint">Your name will be remembered in legend...</p>
   </form>
 </div>
 {% endblock %}
