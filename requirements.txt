@@ -1,2 +1,4 @@
+# Removed playsound — not suitable for web deployments and breaks on Python 3.14 (Render build error).
+# Use browser-side audio playback (HTML <audio> / JS) instead of server-side audio libraries.
+
 colorama
-playsound
