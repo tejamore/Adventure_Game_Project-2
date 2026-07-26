@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="story-card result-{{ result }}">
+  <div class="log">
+    {% for entry in log %}
+      <p class="story-text {% if not loop.last %}faded{% endif %}">{{ entry }}</p>
+    {% endfor %}
+  </div>
+
+  {% if result == "win" %}
+    <div class="banner banner-win">VICTORY &mdash; TREASURE FOUND!</div>
+  {% else %}
+    <div class="banner banner-lose">QUEST FAILED</div>
+  {% endif %}
+
+  <div class="choices">
+    <form action="{{ url_for('restart') }}" method="post" class="choice-form">
+      <button type="submit" class="btn-choice">Play Again</button>
+    </form>
+    <form action="{{ url_for('quit_game') }}" method="post" class="choice-form">
+      <button type="submit" class="btn-link">Quit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
