@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="story-card">
+  <div class="log">
+    {% for entry in log %}
+      <p class="story-text {% if not loop.last %}faded{% endif %}">{{ entry }}</p>
+    {% endfor %}
+  </div>
+  <div class="choices">
+    {% for opt in options %}
+      <form action="{{ url_for('scene', scene_id=opt.action) }}" method="get" class="choice-form">
+        <button type="submit" class="btn-choice">{{ opt.label }}</button>
+      </form>
+    {% endfor %}
+  </div>
+  <form action="{{ url_for('quit_game') }}" method="post" class="quit-form">
+    <button type="submit" class="btn-link">Abandon quest</button>
+  </form>
+</div>
+{% endblock %}
