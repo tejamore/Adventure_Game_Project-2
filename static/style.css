@@ -1,0 +1,211 @@
+:root {
+  --bg-deep: #0e1410;
+  --bg-panel: #16211a;
+  --panel-border: #3c5c42;
+  --gold: #d9b45f;
+  --gold-bright: #f0cf7d;
+  --text-main: #e6ead6;
+  --text-faded: #8fa08f;
+  --win: #4fae6a;
+  --lose: #b6503f;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Cinzel', serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #1a241b 0%, var(--bg-deep) 70%);
+  color: var(--text-main);
+  font-family: var(--mono);
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 720px;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.game-header h1 {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-bright);
+  margin: 0;
+  text-shadow: 0 0 18px rgba(217, 180, 95, 0.35);
+}
+
+.glyph {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 6px rgba(217,180,95,0.4));
+}
+
+.console {
+  background: var(--bg-panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 50px rgba(0,0,0,0.5);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.console::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.015),
+    rgba(255,255,255,0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+.story-card { position: relative; z-index: 1; }
+
+.log { margin-bottom: 28px; }
+
+.story-text {
+  line-height: 1.7;
+  font-size: 0.98rem;
+  margin: 0 0 16px 0;
+  color: var(--text-main);
+  border-left: 2px solid var(--gold);
+  padding-left: 14px;
+}
+
+.story-text.faded {
+  color: var(--text-faded);
+  border-left-color: #2f3f34;
+}
+
+.intro .story-text {
+  border-left: none;
+  padding-left: 0;
+  text-align: center;
+  color: var(--gold-bright);
+  font-size: 1.05rem;
+}
+
+.name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+input[type="text"] {
+  width: 100%;
+  max-width: 320px;
+  background: #0f1712;
+  border: 1px solid var(--panel-border);
+  color: var(--gold-bright);
+  font-family: var(--mono);
+  font-size: 1rem;
+  padding: 12px 14px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(217,180,95,0.15);
+}
+
+.btn-primary, .btn-choice {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: linear-gradient(180deg, #2a3a2d, #1b271d);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  padding: 12px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  width: 100%;
+}
+
+.btn-primary:hover, .btn-choice:hover {
+  background: linear-gradient(180deg, #34472f, #223022);
+  box-shadow: 0 0 16px rgba(217,180,95,0.25);
+  transform: translateY(-1px);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.choice-form { width: 100%; }
+
+.quit-form { text-align: center; margin-top: 20px; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--text-faded);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btn-link:hover { color: var(--lose); }
+
+.banner {
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 8px 0 26px 0;
+}
+
+.banner-win {
+  color: #123018;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  box-shadow: 0 0 24px rgba(240,207,125,0.4);
+}
+
+.banner-lose {
+  color: #2b0f0a;
+  background: linear-gradient(180deg, #d68069, var(--lose));
+  box-shadow: 0 0 24px rgba(182,80,63,0.35);
+}
+
+.game-footer {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.75rem;
+  color: var(--text-faded);
+  letter-spacing: 0.05em;
+}
+
+.scanlines { display: none; }
+
+@media (max-width: 480px) {
+  .console { padding: 22px; }
+  .game-header h1 { font-size: 1.2rem; }
+}
