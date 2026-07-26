@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="story-card intro">
+  <p class="story-text">
+    An ancient land. A legendary treasure lost to time. Rumor says it lies
+    hidden past a dark forest, or deep inside a mysterious cave &mdash; but
+    only the bold, and the clever, will ever find it.
+  </p>
+  <p class="story-text">What is your name, explorer?</p>
+  <form action="{{ url_for('start') }}" method="post" class="name-form">
+    <input
+      type="text"
+      name="player_name"
+      placeholder="Enter your name..."
+      autofocus
+      maxlength="30"
+      required
+    />
+    <button type="submit" class="btn-primary">Begin the Adventure</button>
+  </form>
+</div>
+{% endblock %}
